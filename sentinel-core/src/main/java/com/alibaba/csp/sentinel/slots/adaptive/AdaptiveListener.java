@@ -1,7 +1,7 @@
 package com.alibaba.csp.sentinel.slots.adaptive;
 
-import com.alibaba.csp.sentinel.property.SimplePropertyListener;
-import com.alibaba.csp.sentinel.slots.system.SystemRule;
+import com.alibaba.csp.sentinel.node.ClusterNode;
+import com.alibaba.csp.sentinel.slots.clusterbuilder.ClusterBuilderSlot;
 
 import java.util.List;
 import java.util.Map;
@@ -17,7 +17,7 @@ public class AdaptiveListener implements Runnable {
     public void run() {
         Map<String, AdaptiveRule> adaptiveRules = AdaptiveRuleManager.getAdaptiveRules();
         for (AdaptiveRule rule : adaptiveRules.values()) {
-            int newLimit = rule.getLimiter().update(null, 0, 0, 0);
+            AdaptiveLimiter.adaptiveLimit(rule);
         }
     }
 }

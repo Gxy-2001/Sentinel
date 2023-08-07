@@ -8,6 +8,7 @@ import com.alibaba.csp.sentinel.property.DynamicSentinelProperty;
 import com.alibaba.csp.sentinel.property.PropertyListener;
 import com.alibaba.csp.sentinel.property.SentinelProperty;
 import com.alibaba.csp.sentinel.slotchain.ResourceWrapper;
+import com.alibaba.csp.sentinel.slots.block.RuleConstant;
 
 import java.util.List;
 import java.util.Map;
@@ -51,7 +52,17 @@ public class AdaptiveRuleManager {
             return;
         }
 
-        node.minRt();
+        AdaptiveRule adaptiveRule = adaptiveRules.get(resourceWrapper.getName());
+        int times = adaptiveRule.incrementTimes();
+        if (times > RuleConstant.ADAPTIVE_LIMIT_THRESHOLD) {
+            AdaptiveLimiter.adaptiveLimit(adaptiveRule);
+        }
+    }
+
+    public static void loadRules(List<AdaptiveRule> rules) {
+        for (AdaptiveRule rule : rules) {
+            adaptiveRules.put(rule.getResource(), rule);
+        }
     }
 
 
