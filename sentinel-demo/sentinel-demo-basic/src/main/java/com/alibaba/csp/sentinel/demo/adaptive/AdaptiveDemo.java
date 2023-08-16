@@ -6,6 +6,8 @@ import com.alibaba.csp.sentinel.SphU;
 import com.alibaba.csp.sentinel.demo.flow.FlowQpsDemo;
 import com.alibaba.csp.sentinel.slots.adaptive.AdaptiveRule;
 import com.alibaba.csp.sentinel.slots.adaptive.AdaptiveRuleManager;
+import com.alibaba.csp.sentinel.slots.adaptive.algorithm.BRPCLimit;
+import com.alibaba.csp.sentinel.slots.adaptive.algorithm.GradientLimit;
 import com.alibaba.csp.sentinel.slots.adaptive.algorithm.VegasLimit;
 import com.alibaba.csp.sentinel.slots.block.BlockException;
 import com.alibaba.csp.sentinel.slots.block.RuleConstant;
@@ -14,6 +16,7 @@ import com.alibaba.csp.sentinel.slots.block.flow.FlowRuleManager;
 import com.alibaba.csp.sentinel.util.TimeUtil;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
@@ -35,7 +38,6 @@ public class AdaptiveDemo {
         simulateTraffic();
 
         System.out.println("===== begin to do flow control");
-        System.out.println("only 20 requests per second can pass");
 
     }
 
@@ -43,12 +45,28 @@ public class AdaptiveDemo {
         List<AdaptiveRule> rules = new ArrayList<>();
         AdaptiveRule rule1 = new AdaptiveRule();
         rule1.setResource(KEY);
-        // set init limit qps to 20
-        rule1.setCount(20);
-        rule1.setStrategy(RuleConstant.ADAPTIVE_VEGAS);
-        rule1.setLimiter(new VegasLimit());
+        // set init limit qp
+        // init count 20
+        int initCount = 10;
+        rule1.setCount(initCount);
+        rule1.addCount(initCount);
+//        rule1.setStrategy(RuleConstant.ADAPTIVE_VEGAS);
+//        rule1.setLimiter(VegasLimit.getInstance());
+//        rule1.setStrategy(RuleConstant.ADAPTIVE_GRADIENT);
+//        rule1.setLimiter(GradientLimit.getInstance());
+        rule1.setStrategy(RuleConstant.ADAPTIVE_BRPC);
+        rule1.setLimiter(BRPCLimit.getInstance());
         rules.add(rule1);
         AdaptiveRuleManager.loadRules(rules);
+
+        List<FlowRule> rules2 = new ArrayList<>();
+        FlowRule rule2 = new FlowRule();
+        rule2.setResource(KEY);
+        rule2.setCount(initCount);
+        rule2.setGrade(RuleConstant.FLOW_GRADE_QPS);
+        rule2.setLimitApp("default");
+        rules2.add(rule2);
+        FlowRuleManager.loadRules(rules2);
     }
 
     private static void tick() {
@@ -62,7 +80,7 @@ public class AdaptiveDemo {
     private static AtomicInteger block = new AtomicInteger();
     private static AtomicInteger total = new AtomicInteger();
 
-    private static final int threadCount = 5;
+    private static final int threadCount = 10;
 
     private static int seconds = 60 + 40;
 
@@ -119,6 +137,8 @@ public class AdaptiveDemo {
         }
     }
 
+    static Random random = new Random();
+
     static class RunTask implements Runnable {
         @Override
         public void run() {
@@ -128,9 +148,23 @@ public class AdaptiveDemo {
                 try {
                     entry = SphU.entry(KEY, EntryType.IN);
                     // token acquired, means pass
+                    try {
+                        TimeUnit.MILLISECONDS.sleep(90 + random.nextInt(20));
+                        //TimeUnit.MILLISECONDS.sleep(50);
+                        //CpuRunMethod();
+                    } catch (InterruptedException e) {
+                        // ignore
+                    }
                     pass.addAndGet(1);
+
                 } catch (BlockException e1) {
                     block.incrementAndGet();
+                    try {
+                        //TimeUnit.MILLISECONDS.sleep(random.nextInt(500));
+                        TimeUnit.MILLISECONDS.sleep(0);
+                    } catch (InterruptedException e) {
+                        // ignore
+                    }
                 } catch (Exception e2) {
                     // biz exception
                 } finally {
@@ -142,7 +176,8 @@ public class AdaptiveDemo {
 
                 Random random2 = new Random();
                 try {
-                    TimeUnit.MILLISECONDS.sleep(random2.nextInt(50));
+                    //TimeUnit.MILLISECONDS.sleep(random2.nextInt(100));
+                    TimeUnit.MILLISECONDS.sleep(0);
                 } catch (InterruptedException e) {
                     // ignore
                 }
