@@ -35,7 +35,6 @@ public class AdaptiveDemo {
         simulateTraffic();
 
         System.out.println("===== begin to do flow control");
-        System.out.println("only 20 requests per second can pass");
 
     }
 
@@ -142,7 +141,7 @@ public class AdaptiveDemo {
 
                 Random random2 = new Random();
                 try {
-                    TimeUnit.MILLISECONDS.sleep(random2.nextInt(50));
+                    TimeUnit.MILLISECONDS.sleep(random2.nextInt(200));
                 } catch (InterruptedException e) {
                     // ignore
                 }

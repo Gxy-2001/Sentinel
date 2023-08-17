@@ -22,6 +22,7 @@ public class AdaptiveLimiter {
         Queue<Integer> oldCounts = rule.getOldCounts();
         int newLimit = rule.getLimiter().update(oldCounts, minRt, rt, passQps);
         rule.setCount(newLimit);
+        System.out.printf("oldCounts %s minRt %s rt %s passQps %s \n", oldCounts, minRt, rt, passQps);
         System.out.println("设置新阈值" + newLimit);
         rule.addCount(newLimit);
         rule.setTimes(0);

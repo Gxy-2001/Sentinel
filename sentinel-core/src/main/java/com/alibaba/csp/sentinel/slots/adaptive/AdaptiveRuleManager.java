@@ -36,7 +36,7 @@ public class AdaptiveRuleManager {
 
     static {
         adaptiveListener = new AdaptiveListener();
-        scheduler.scheduleAtFixedRate(adaptiveListener, 0, 60, TimeUnit.SECONDS);
+        scheduler.scheduleAtFixedRate(adaptiveListener, 0, 1, TimeUnit.SECONDS);
         currentProperty.addListener(LISTENER);
     }
 
