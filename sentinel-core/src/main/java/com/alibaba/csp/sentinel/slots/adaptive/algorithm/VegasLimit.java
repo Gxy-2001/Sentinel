@@ -39,8 +39,6 @@ public class VegasLimit extends AbstractLimit {
         } else {
             return (int) estimatedLimit;
         }
-
-
         //newLimit = Math.max(1, Math.min(maxLimit, newLimit));
         newLimit = (1 - RuleConstant.ADAPTIVE_LIMIT_SMOOTHING) * estimatedLimit + RuleConstant.ADAPTIVE_LIMIT_SMOOTHING * newLimit;
         return (int) newLimit;
