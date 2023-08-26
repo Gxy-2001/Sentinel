@@ -55,7 +55,7 @@ public class AdaptiveRuleManager {
         AdaptiveRule adaptiveRule = adaptiveRules.get(resourceWrapper.getName());
         int times = adaptiveRule.incrementTimes();
         if (times > RuleConstant.ADAPTIVE_LIMIT_THRESHOLD) {
-            AdaptiveLimiter.adaptiveLimit(adaptiveRule);
+            AdaptiveLimiter.adaptiveLimit(adaptiveRule, node);
         }
     }
 

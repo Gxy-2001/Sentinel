@@ -6,6 +6,8 @@ import com.alibaba.csp.sentinel.SphU;
 import com.alibaba.csp.sentinel.demo.flow.FlowQpsDemo;
 import com.alibaba.csp.sentinel.slots.adaptive.AdaptiveRule;
 import com.alibaba.csp.sentinel.slots.adaptive.AdaptiveRuleManager;
+import com.alibaba.csp.sentinel.slots.adaptive.algorithm.BRPCLimit;
+import com.alibaba.csp.sentinel.slots.adaptive.algorithm.GradientLimit;
 import com.alibaba.csp.sentinel.slots.adaptive.algorithm.VegasLimit;
 import com.alibaba.csp.sentinel.slots.block.BlockException;
 import com.alibaba.csp.sentinel.slots.block.RuleConstant;
@@ -49,7 +51,11 @@ public class AdaptiveDemo {
         rule1.setCount(initCount);
         rule1.addCount(initCount);
         rule1.setStrategy(RuleConstant.ADAPTIVE_VEGAS);
-        rule1.setLimiter(new VegasLimit());
+        rule1.setLimiter(VegasLimit.getInstance());
+//        rule1.setStrategy(RuleConstant.ADAPTIVE_GRADIENT);
+//        rule1.setLimiter(GradientLimit.getInstance());
+//        rule1.setStrategy(RuleConstant.ADAPTIVE_BRPC);
+//        rule1.setLimiter(BRPCLimit.getInstance());
         rules.add(rule1);
         AdaptiveRuleManager.loadRules(rules);
 

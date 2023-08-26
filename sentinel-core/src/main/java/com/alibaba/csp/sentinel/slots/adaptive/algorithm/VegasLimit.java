@@ -10,6 +10,16 @@ import com.alibaba.csp.sentinel.slots.block.RuleConstant;
  * @date 2023/8/2 14:47
  */
 public class VegasLimit extends AbstractLimit {
+    private VegasLimit() {
+    }
+
+    private static class VegasLimitContainer {
+        private static VegasLimit instance = new VegasLimit();
+    }
+
+    public static AbstractLimit getInstance() {
+        return VegasLimitContainer.instance;
+    }
 
     @Override
     public int update(Queue<Integer> oldLimits, double minRt, double rt, double passQps) {

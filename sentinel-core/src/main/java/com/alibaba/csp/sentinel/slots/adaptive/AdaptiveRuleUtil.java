@@ -1,6 +1,8 @@
 package com.alibaba.csp.sentinel.slots.adaptive;
 
 import com.alibaba.csp.sentinel.slots.adaptive.algorithm.AbstractLimit;
+import com.alibaba.csp.sentinel.slots.adaptive.algorithm.BRPCLimit;
+import com.alibaba.csp.sentinel.slots.adaptive.algorithm.GradientLimit;
 import com.alibaba.csp.sentinel.slots.adaptive.algorithm.VegasLimit;
 import com.alibaba.csp.sentinel.slots.block.RuleConstant;
 import com.alibaba.csp.sentinel.slots.block.flow.FlowRule;
@@ -36,8 +38,12 @@ public class AdaptiveRuleUtil {
     private static AbstractLimit generateRater(AdaptiveRule rule) {
         switch (rule.getStrategy()) {
             case RuleConstant.ADAPTIVE_VEGAS:
-                return new VegasLimit();
+                return VegasLimit.getInstance();
+            case RuleConstant.ADAPTIVE_GRADIENT:
+                return GradientLimit.getInstance();
+            case RuleConstant.ADAPTIVE_BRPC:
+                return BRPCLimit.getInstance();
         }
-        return new VegasLimit();
+        return VegasLimit.getInstance();
     }
 }

@@ -11,6 +11,13 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @date 2023/8/17 15:28
  */
 public class GradientLimit extends AbstractLimit {
+    private static class GradientLimitContainer {
+        private static GradientLimit instance = new GradientLimit();
+    }
+
+    public static AbstractLimit getInstance() {
+        return GradientLimit.GradientLimitContainer.instance;
+    }
     private int minLimit = 20;
     private int maxLimit = 200;
     private int window = 600;

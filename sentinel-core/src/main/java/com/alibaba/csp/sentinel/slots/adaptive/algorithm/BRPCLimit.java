@@ -8,6 +8,15 @@ import java.util.Queue;
  * @date 2023/8/17 16:27
  */
 public class BRPCLimit extends AbstractLimit {
+
+    private static class BRPCLimitContainer {
+        private static BRPCLimit instance = new BRPCLimit();
+    }
+
+    public static AbstractLimit getInstance() {
+        return BRPCLimit.BRPCLimitContainer.instance;
+    }
+
     double alpha = 0.3;
     double maxQps = 0;
 
