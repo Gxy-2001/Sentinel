@@ -14,6 +14,7 @@ import com.alibaba.csp.sentinel.slots.block.flow.FlowRuleManager;
 import com.alibaba.csp.sentinel.util.TimeUtil;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
@@ -42,12 +43,24 @@ public class AdaptiveDemo {
         List<AdaptiveRule> rules = new ArrayList<>();
         AdaptiveRule rule1 = new AdaptiveRule();
         rule1.setResource(KEY);
-        // set init limit qps to 20
-        rule1.setCount(20);
+        // set init limit qp
+        // init count 20
+        int initCount = 10;
+        rule1.setCount(initCount);
+        rule1.addCount(initCount);
         rule1.setStrategy(RuleConstant.ADAPTIVE_VEGAS);
         rule1.setLimiter(new VegasLimit());
         rules.add(rule1);
         AdaptiveRuleManager.loadRules(rules);
+
+        List<FlowRule> rules2 = new ArrayList<>();
+        FlowRule rule2 = new FlowRule();
+        rule2.setResource(KEY);
+        rule2.setCount(initCount);
+        rule2.setGrade(RuleConstant.FLOW_GRADE_QPS);
+        rule2.setLimitApp("default");
+        rules2.add(rule2);
+        FlowRuleManager.loadRules(rules2);
     }
 
     private static void tick() {
@@ -61,7 +74,7 @@ public class AdaptiveDemo {
     private static AtomicInteger block = new AtomicInteger();
     private static AtomicInteger total = new AtomicInteger();
 
-    private static final int threadCount = 5;
+    private static final int threadCount = 100;
 
     private static int seconds = 60 + 40;
 
@@ -118,6 +131,18 @@ public class AdaptiveDemo {
         }
     }
 
+    static Random random = new Random();
+
+    static void CpuRunMethod() {
+        int num = 500000;
+        Random random = new Random();
+        List<Integer> randomList = new ArrayList<>();
+        for (int i = 0; i < num; i++) {
+            randomList.add(random.nextInt(num));
+        }
+        Collections.sort(randomList);
+    }
+
     static class RunTask implements Runnable {
         @Override
         public void run() {
@@ -127,9 +152,23 @@ public class AdaptiveDemo {
                 try {
                     entry = SphU.entry(KEY, EntryType.IN);
                     // token acquired, means pass
+                    try {
+                        //TimeUnit.MILLISECONDS.sleep(100 + random.nextInt(10));
+                        TimeUnit.MILLISECONDS.sleep(50);
+                        //CpuRunMethod();
+                    } catch (InterruptedException e) {
+                        // ignore
+                    }
                     pass.addAndGet(1);
+
                 } catch (BlockException e1) {
                     block.incrementAndGet();
+                    try {
+                        //TimeUnit.MILLISECONDS.sleep(random.nextInt(500));
+                        TimeUnit.MILLISECONDS.sleep(0);
+                    } catch (InterruptedException e) {
+                        // ignore
+                    }
                 } catch (Exception e2) {
                     // biz exception
                 } finally {
@@ -141,7 +180,8 @@ public class AdaptiveDemo {
 
                 Random random2 = new Random();
                 try {
-                    TimeUnit.MILLISECONDS.sleep(random2.nextInt(200));
+                    TimeUnit.MILLISECONDS.sleep(random2.nextInt(100));
+                    //TimeUnit.MILLISECONDS.sleep(0);
                 } catch (InterruptedException e) {
                     // ignore
                 }
