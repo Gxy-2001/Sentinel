@@ -18,22 +18,24 @@ public class GradientLimit extends AbstractLimit {
     public static AbstractLimit getInstance() {
         return GradientLimit.GradientLimitContainer.instance;
     }
-    private int minLimit = 20;
+
+    private int minLimit = 1;
     private int maxLimit = 200;
-    private int window = 600;
+    private int window = 60;
     private int warmupWindow = 10;
     private double tolerance = 1.5;
 
     @Override
     public int update(Queue<Integer> oldLimits, double minRt, double rt, double passQps) {
-        double estimatedLimit = 20;
+        double estimatedQps = 20;
         for (Integer oldLimit : oldLimits) {
-            estimatedLimit = oldLimit;
+            estimatedQps = oldLimit;
         }
+        double estimatedLimit = estimatedQps * rt;
         final double queueSize = Math.sqrt(estimatedLimit);
 
-        double shortRtt = rt;
-        double longRtt = calLongRtt(estimatedLimit);
+        double shortRtt = minRt;
+        double longRtt = calLongRtt(rt);
 
 
         if (longRtt / shortRtt > 2) {
@@ -45,9 +47,8 @@ public class GradientLimit extends AbstractLimit {
         newLimit = estimatedLimit * (1 - RuleConstant.ADAPTIVE_LIMIT_SMOOTHING) + newLimit * RuleConstant.ADAPTIVE_LIMIT_SMOOTHING;
         newLimit = Math.max(minLimit, Math.min(maxLimit, newLimit));
 
-        estimatedLimit = newLimit;
-
-        return (int) estimatedLimit;
+        estimatedQps = newLimit / rt;
+        return (int) estimatedQps;
     }
 
     private AtomicInteger count = new AtomicInteger(0);
@@ -55,14 +56,14 @@ public class GradientLimit extends AbstractLimit {
     private double sum = 0.0;
     private double value = 0.0;
 
-    private double calLongRtt(double estimatedLimit) {
+    private double calLongRtt(double rt) {
         if (count.get() < warmupWindow) {
             count.incrementAndGet();
-            sum += estimatedLimit;
+            sum += rt;
             value = sum / count.get();
         } else {
             double factor = factor(window);
-            value = value * (1 - factor) + estimatedLimit * factor;
+            value = value * (1 - factor) + rt * factor;
         }
         return value;
     }

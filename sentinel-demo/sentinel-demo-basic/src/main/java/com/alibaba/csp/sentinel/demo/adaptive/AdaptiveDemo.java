@@ -50,12 +50,12 @@ public class AdaptiveDemo {
         int initCount = 10;
         rule1.setCount(initCount);
         rule1.addCount(initCount);
-        rule1.setStrategy(RuleConstant.ADAPTIVE_VEGAS);
-        rule1.setLimiter(VegasLimit.getInstance());
+//        rule1.setStrategy(RuleConstant.ADAPTIVE_VEGAS);
+//        rule1.setLimiter(VegasLimit.getInstance());
 //        rule1.setStrategy(RuleConstant.ADAPTIVE_GRADIENT);
 //        rule1.setLimiter(GradientLimit.getInstance());
-//        rule1.setStrategy(RuleConstant.ADAPTIVE_BRPC);
-//        rule1.setLimiter(BRPCLimit.getInstance());
+        rule1.setStrategy(RuleConstant.ADAPTIVE_BRPC);
+        rule1.setLimiter(BRPCLimit.getInstance());
         rules.add(rule1);
         AdaptiveRuleManager.loadRules(rules);
 
@@ -80,7 +80,7 @@ public class AdaptiveDemo {
     private static AtomicInteger block = new AtomicInteger();
     private static AtomicInteger total = new AtomicInteger();
 
-    private static final int threadCount = 100;
+    private static final int threadCount = 10;
 
     private static int seconds = 60 + 40;
 
@@ -139,16 +139,6 @@ public class AdaptiveDemo {
 
     static Random random = new Random();
 
-    static void CpuRunMethod() {
-        int num = 500000;
-        Random random = new Random();
-        List<Integer> randomList = new ArrayList<>();
-        for (int i = 0; i < num; i++) {
-            randomList.add(random.nextInt(num));
-        }
-        Collections.sort(randomList);
-    }
-
     static class RunTask implements Runnable {
         @Override
         public void run() {
@@ -159,8 +149,8 @@ public class AdaptiveDemo {
                     entry = SphU.entry(KEY, EntryType.IN);
                     // token acquired, means pass
                     try {
-                        //TimeUnit.MILLISECONDS.sleep(100 + random.nextInt(10));
-                        TimeUnit.MILLISECONDS.sleep(50);
+                        TimeUnit.MILLISECONDS.sleep(90 + random.nextInt(20));
+                        //TimeUnit.MILLISECONDS.sleep(50);
                         //CpuRunMethod();
                     } catch (InterruptedException e) {
                         // ignore
@@ -186,8 +176,8 @@ public class AdaptiveDemo {
 
                 Random random2 = new Random();
                 try {
-                    TimeUnit.MILLISECONDS.sleep(random2.nextInt(100));
-                    //TimeUnit.MILLISECONDS.sleep(0);
+                    //TimeUnit.MILLISECONDS.sleep(random2.nextInt(100));
+                    TimeUnit.MILLISECONDS.sleep(0);
                 } catch (InterruptedException e) {
                     // ignore
                 }

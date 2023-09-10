@@ -23,10 +23,11 @@ public class VegasLimit extends AbstractLimit {
 
     @Override
     public int update(Queue<Integer> oldLimits, double minRt, double rt, double passQps) {
-        double estimatedLimit = 20;
+        double estimatedQps = 0;
         for (Integer oldLimit : oldLimits) {
-            estimatedLimit = oldLimit;
+            estimatedQps = oldLimit;
         }
+        double estimatedLimit = estimatedQps * rt;
         final int queueSize = (int) Math.ceil(estimatedLimit * (1 - minRt / rt));
 
         double newLimit;
@@ -51,6 +52,7 @@ public class VegasLimit extends AbstractLimit {
         }
         //newLimit = Math.max(1, Math.min(maxLimit, newLimit));
         newLimit = (1 - RuleConstant.ADAPTIVE_LIMIT_SMOOTHING) * estimatedLimit + RuleConstant.ADAPTIVE_LIMIT_SMOOTHING * newLimit;
-        return (int) newLimit;
+        int newQps = (int) (newLimit / rt);
+        return newQps;
     }
 }

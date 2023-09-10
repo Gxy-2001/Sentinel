@@ -18,11 +18,15 @@ public class BRPCLimit extends AbstractLimit {
     }
 
     double alpha = 0.3;
+    double min_explore_ratio = 1.1;
+    double max_explore_ratio = 1.3;
+    double correction_factor = 0.1;
+    double change_step = 0.05;
     double maxQps = 0;
+    double explore_ratio = 1;
 
     @Override
     public int update(Queue<Integer> oldLimits, double minRt, double rt, double passQps) {
-
         double emaFactor = alpha / 10;
         if (passQps >= maxQps) {
             maxQps = passQps;
@@ -30,8 +34,17 @@ public class BRPCLimit extends AbstractLimit {
             maxQps = passQps * emaFactor + maxQps * (1 - emaFactor);
         }
 
-        double maxConcurrency = maxQps * ((2 + alpha) * minRt - rt);
-        // TODO
-        return (int) maxConcurrency;
+        //double maxConcurrency = maxQps * ((1 + alpha) * minRt  - rt) / 1000;
+        if (rt <= minRt * (1.0 + min_explore_ratio * correction_factor) ||
+                passQps <= maxQps / (1.0 + min_explore_ratio)) {
+            explore_ratio = Math.min(max_explore_ratio, explore_ratio + change_step);
+        } else {
+            explore_ratio = Math.max(min_explore_ratio, explore_ratio - change_step);
+        }
+        double maxConcurrency =
+                minRt * maxQps / 100 * (1 + explore_ratio);
+        System.out.println("\n" + maxQps + " " + explore_ratio);
+        int maxQps = (int) (maxConcurrency / rt);
+        return maxQps;
     }
 }
