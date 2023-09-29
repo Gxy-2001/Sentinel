@@ -1,5 +1,6 @@
 package com.alibaba.csp.sentinel.slots.adaptive.algorithm;
 
+import java.util.Map;
 import java.util.Queue;
 
 /**
@@ -21,7 +22,7 @@ public class BRPCLimit extends AbstractLimit {
     double min_explore_ratio = 1.1;
     double max_explore_ratio = 1.3;
     double correction_factor = 0.1;
-    double change_step = 0.05;
+    double change_step = 0.02;
     double maxQps = 0;
     double explore_ratio = 1;
 
@@ -42,9 +43,10 @@ public class BRPCLimit extends AbstractLimit {
             explore_ratio = Math.max(min_explore_ratio, explore_ratio - change_step);
         }
         double maxConcurrency =
-                minRt * maxQps / 100 * (1 + explore_ratio);
+                minRt * maxQps * (1 + explore_ratio);
         System.out.println("\n" + maxQps + " " + explore_ratio);
         int maxQps = (int) (maxConcurrency / rt);
+        maxQps = Math.max(10, Math.min(maxQps, 1000));
         return maxQps;
     }
 }

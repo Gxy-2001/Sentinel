@@ -1,5 +1,6 @@
 package com.alibaba.csp.sentinel.slots.adaptive;
 
+import com.alibaba.csp.sentinel.EntryType;
 import com.alibaba.csp.sentinel.node.ClusterNode;
 import com.alibaba.csp.sentinel.node.StatisticNode;
 import com.alibaba.csp.sentinel.slots.block.RuleConstant;
@@ -19,7 +20,7 @@ import java.util.Queue;
  */
 public class AdaptiveLimiter {
     public static void adaptiveLimit(AdaptiveRule rule) {
-        ClusterNode node = ClusterBuilderSlot.getClusterNode(rule.getResource());
+        ClusterNode node = ClusterBuilderSlot.getClusterNode(rule.getResource(), EntryType.IN);
         if (node != null) {
             adaptiveLimit(rule, node);
         }

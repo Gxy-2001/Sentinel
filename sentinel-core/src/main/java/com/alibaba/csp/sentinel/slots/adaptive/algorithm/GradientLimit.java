@@ -19,11 +19,11 @@ public class GradientLimit extends AbstractLimit {
         return GradientLimit.GradientLimitContainer.instance;
     }
 
-    private int minLimit = 1;
+    private int minLimit = 10;
     private int maxLimit = 200;
     private int window = 60;
     private int warmupWindow = 10;
-    private double tolerance = 1.5;
+    private double tolerance = 0.4;
 
     @Override
     public int update(Queue<Integer> oldLimits, double minRt, double rt, double passQps) {
@@ -45,7 +45,7 @@ public class GradientLimit extends AbstractLimit {
         final double gradient = Math.max(0.5, Math.min(1.0, tolerance * longRtt / shortRtt));
         double newLimit = estimatedLimit * gradient + queueSize;
         newLimit = estimatedLimit * (1 - RuleConstant.ADAPTIVE_LIMIT_SMOOTHING) + newLimit * RuleConstant.ADAPTIVE_LIMIT_SMOOTHING;
-        newLimit = Math.max(minLimit, Math.min(maxLimit, newLimit));
+        newLimit = Math.max(minLimit * rt, Math.min(maxLimit * rt, newLimit));
 
         estimatedQps = newLimit / rt;
         return (int) estimatedQps;

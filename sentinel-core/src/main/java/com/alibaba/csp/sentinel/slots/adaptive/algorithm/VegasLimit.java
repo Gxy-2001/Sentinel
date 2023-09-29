@@ -23,6 +23,7 @@ public class VegasLimit extends AbstractLimit {
 
     @Override
     public int update(Queue<Integer> oldLimits, double minRt, double rt, double passQps) {
+        // 适合微调，不太适合系统状态有大幅度变化的场景，因为每次调整的大小只有 log10(Limit) ，而且还有smoothing系数
         double estimatedQps = 0;
         for (Integer oldLimit : oldLimits) {
             estimatedQps = oldLimit;
